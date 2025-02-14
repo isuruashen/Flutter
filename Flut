@@ -1,1 +1,194 @@
-ashen
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+void showCustomSnackBar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+    ),
+  );
+}
+
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const MaterialApp(home: MainAppBody()));
+}
+
+class MainAppBody extends StatefulWidget {
+  const MainAppBody({super.key});
+
+  @override
+  State<MainAppBody> createState() => _MainAppBodyState();
+}
+
+class _MainAppBodyState extends State<MainAppBody> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("SignUp Page"),
+        backgroundColor: Colors.red,
+      ),
+      body: const SignupBody(),
+    );
+  }
+}
+
+class SignupBody extends StatefulWidget {
+  const SignupBody({super.key});
+
+  @override
+  State<SignupBody> createState() => _SignupBodyState();
+}
+
+class _SignupBodyState extends State<SignupBody> {
+  TextEditingController nameController = TextEditingController();
+  TextEditingController regController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController password2Controller = TextEditingController();
+
+
+  final CollectionReference usersCollection =
+  FirebaseFirestore.instance.collection('students');
+
+
+  void checkSignin() {
+    String name = nameController.text;
+    String reg = regController.text;
+    String email = emailController.text;
+    String password = passwordController.text;
+    String password2 = password2Controller.text;
+
+    if (name.isEmpty ||
+        reg.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        password2.isEmpty) {
+      setState(() {
+        showCustomSnackBar(context, 'fields cannot be empty');
+      });
+    } else if (password != password2) {
+      setState(() {
+        showCustomSnackBar(context, 'Passwords do not match');
+      });
+    } else {
+      setState(() {
+
+        saveUserToFirestore(name, reg, email, password2);
+      });
+    }
+  }
+
+
+  void saveUserToFirestore(
+      String name, String reg, String email, String password2) async {
+    try {
+      await usersCollection.add({
+        'Fire_Name': name,
+        'Fire_Regnum': reg,
+        'Fire_Email': email,
+        'Fire_Password': password2,
+      });
+      showCustomSnackBar(context, 'Account created');
+    } catch (e) {
+      showCustomSnackBar(context, 'Error: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        Container(
+          margin: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(
+                height: 20,
+              ),
+              TextField(
+                controller: nameController,
+                style: TextStyle(
+                  fontSize: 20,
+
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TextField(
+                controller: regController,
+                style: TextStyle(
+                  fontSize: 20,
+
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Registration Number',
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TextField(
+                controller: emailController,
+                style: TextStyle(
+                  fontSize: 20,
+
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                style: TextStyle(
+                  fontSize: 20,
+
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              TextField(
+                controller: password2Controller,
+                obscureText: true,
+                style: TextStyle(
+                  fontSize: 20,
+
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    checkSignin();
+                  },
+                  child: const Text("Sign Up")),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
