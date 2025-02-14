@@ -1,0 +1,282 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MaterialApp(
+    home: Scaffold(
+      appBar: AppBar(
+        title: const Text("E-Bill Calculator"),
+      ),
+      body: const AppBody(),
+    ),
+  ));
+}
+
+void showCustomSnackbar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 2),
+    ),
+  );
+}
+
+class AppBody extends StatefulWidget {
+  const AppBody({super.key});
+
+  @override
+  State<AppBody> createState() => _AppBodyState();
+}
+
+class _AppBodyState extends State<AppBody> {
+  TextEditingController NameController = TextEditingController();
+  TextEditingController MonthController = TextEditingController();
+  TextEditingController AcnController = TextEditingController();
+  TextEditingController UnitsController = TextEditingController();
+  TextEditingController PnController = TextEditingController();
+
+  String displayName = "";
+  String displayMonth = "";
+  double displayTotalBill = 0.0;
+
+  void calculateElectricityBill() {
+    String name = NameController.text;
+    String month = MonthController.text;
+    String accountNumber = AcnController.text;
+    String unitsText = UnitsController.text;
+    String phoneNumber = PnController.text;
+
+    if (name.isEmpty |
+        month.isEmpty |
+        accountNumber.isEmpty |
+        unitsText.isEmpty |
+        phoneNumber.isEmpty) {
+      showCustomSnackbar(context, "Please fill in all the details.");
+      return;
+    }
+
+    int units = int.parse(unitsText);
+
+    double fixedCharge = 0.0;
+    double energyCharge = 0.0;
+    double totalBill = 0.0;
+
+    if (units <= 30) {
+      energyCharge = units * 30.0;
+      fixedCharge = 400.0;
+    } else if (units <= 60) {
+      energyCharge = (30 * 30.0) + ((units - 30) * 37.0);
+      fixedCharge = 550.0;
+    } else if (units <= 90) {
+      energyCharge = (30 * 30.0) + (30 * 37.0) + ((units - 60) * 42.0);
+      fixedCharge = 650.0;
+    } else if (units <= 120) {
+      energyCharge =
+          (30 * 30.0) + (30 * 37.0) + (30 * 42.0) + ((units - 90) * 50.0);
+      fixedCharge = 1500.0;
+    } else {
+      energyCharge = (30 * 30.0) +
+          (30 * 37.0) +
+          (30 * 42.0) +
+          (30 * 50.0) +
+          ((units - 120) * 75.0);
+      fixedCharge = 1500.0;
+    }
+
+    totalBill = energyCharge + fixedCharge;
+
+    setState(() {
+      displayName = name;
+      displayMonth = month;
+      displayTotalBill = totalBill;
+    });
+  }
+
+  void clearall() {
+    setState(() {
+      NameController.clear();
+      MonthController.clear();
+      AcnController.clear();
+      UnitsController.clear();
+      PnController.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Hi $displayName, your $displayMonth month total bill is:",
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                "Rs. $displayTotalBill",
+                style: const TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Bill Details",
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Text(
+                    "Name:",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: NameController,
+                      keyboardType: TextInputType.text,
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Text(
+                    "Month:",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: MonthController,
+                      keyboardType: TextInputType.text,
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Text(
+                    "Account Number:",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: AcnController,
+                      keyboardType: TextInputType.text,
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Text(
+                    "Consumption units:",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: UnitsController,
+                      keyboardType: TextInputType.text,
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Text(
+                    "Phone number:",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: PnController,
+                      keyboardType: TextInputType.text,
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        ElevatedButton(
+          onPressed: calculateElectricityBill,
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+          child: const Text(
+            "Calculate Bill",
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        ElevatedButton(
+          onPressed: clearall,
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+          child: const Text(
+            "Clear All",
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+}
